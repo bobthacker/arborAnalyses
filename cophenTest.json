@@ -1,0 +1,165 @@
+{
+    "connections": [
+        {
+            "name": "distance.matrix",
+            "output": "distance.matrix",
+            "output_step": "Cophenetic Distance Matrix from Tree"
+        },
+        {
+            "input": "tree",
+            "input_step": "rescalePhylo",
+            "name": "phy"
+        },
+        {
+            "input": "model",
+            "input_step": "rescalePhylo",
+            "name": "model"
+        },
+        {
+            "input": "parameter",
+            "input_step": "rescalePhylo",
+            "name": "parameter"
+        },
+        {
+            "input": "phy",
+            "input_step": "Cophenetic Distance Matrix from Tree",
+            "output": "rscTree",
+            "output_step": "rescalePhylo"
+        }
+    ],
+    "inputs": [
+        {
+            "description": "Input tree",
+            "format": "r.apetree",
+            "name": "phy",
+            "type": "tree",
+            "x": 62,
+            "y": 74
+        },
+        {
+            "default": "lambda",
+            "domain": [
+                "lambda",
+                "BM",
+                "OU",
+                "EB",
+                "nrate",
+                "lrate",
+                "trend",
+                "kappa",
+                "delta",
+                "white",
+                "depth"
+            ],
+            "format": "text",
+            "name": "model",
+            "type": "string",
+            "x": 29,
+            "y": 195
+        },
+        {
+            "format": "number",
+            "name": "parameter",
+            "type": "number",
+            "x": 120,
+            "y": 357
+        }
+    ],
+    "mode": "workflow",
+    "name": "cophenTest",
+    "outputs": [
+        {
+            "description": "Output cophenetic distance matrix",
+            "format": "r.dataframe",
+            "name": "distance.matrix",
+            "type": "table",
+            "x": 807,
+            "y": 114
+        }
+    ],
+    "steps": [
+        {
+            "id": "Cophenetic Distance Matrix from Tree",
+            "name": "Cophenetic Distance Matrix from Tree",
+            "task": {
+                "inputs": [
+                    {
+                        "description": "Input tree",
+                        "format": "r.apetree",
+                        "name": "phy",
+                        "type": "tree"
+                    }
+                ],
+                "mode": "r",
+                "name": "Cophenetic Distance Matrix from Tree",
+                "outputs": [
+                    {
+                        "description": "Output cophenetic distance matrix",
+                        "format": "r.dataframe",
+                        "name": "distance.matrix",
+                        "type": "table"
+                    }
+                ],
+                "script": "distance.matrix<-cophenetic(phy)",
+                "x": 445,
+                "y": 52
+            },
+            "x": 547,
+            "y": 245
+        },
+        {
+            "id": "rescalePhylo",
+            "name": "rescalePhylo",
+            "task": {
+                "inputs": [
+                    {
+                        "format": "r.apetree",
+                        "name": "tree",
+                        "type": "tree"
+                    },
+                    {
+                        "default": "lambda",
+                        "domain": [
+                            "lambda",
+                            "BM",
+                            "OU",
+                            "EB",
+                            "nrate",
+                            "lrate",
+                            "trend",
+                            "kappa",
+                            "delta",
+                            "white",
+                            "depth"
+                        ],
+                        "format": "text",
+                        "name": "model",
+                        "type": "string"
+                    },
+                    {
+                        "format": "number",
+                        "name": "parameter",
+                        "type": "number"
+                    }
+                ],
+                "mode": "r",
+                "name": "rescalePhylo",
+                "outputs": [
+                    {
+                        "format": "r.apetree",
+                        "name": "rscTree",
+                        "type": "tree"
+                    },
+                    {
+                        "format": "png.base64",
+                        "name": "plotrstree",
+                        "type": "image"
+                    }
+                ],
+                "script": "require(geiger)\nrequire(cardoonTools)\nrscFn <- rescale(tree, model=model)\nrscTree <- rscFn(parameter)\n\nTH <- max(branching.times(rscTree))\nplotrstree <- cardoonPlot(expression(plot(rscTree, label.offset=0.05*TH)), width=1000, height=1000, res=100)\nplotrstree <- plotrstree$png"
+            },
+            "x": 281,
+            "y": 90
+        }
+    ]
+}

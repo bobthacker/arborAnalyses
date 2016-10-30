@@ -1,0 +1,31 @@
+{
+    "inputs": [
+        {
+            "description": "Metadata file (row names match comm)",
+            "format": "r.dataframe",
+            "name": "metadata",
+            "type": "table"
+        },
+        {
+            "format": "r.dataframe",
+            "name": "dist",
+            "type": "table"
+        },
+        {
+            "description": "The formula to be used",
+            "format": "text",
+            "name": "formula",
+            "type": "string"
+        }
+    ],
+    "mode": "r",
+    "name": "adonis UAB",
+    "outputs": [
+        {
+            "format": "r.dataframe",
+            "name": "adonis_out",
+            "type": "table"
+        }
+    ],
+    "script": "library(picante)\ndist <- as.dist(dist)\nf1 <- as.formula(paste(\"dist~\", formula, collapse=\"\"))\nres <- adonis(f1, data=metadata)\n\nadonis_out <- as.matrix(res$aov.tab)\n"
+}
