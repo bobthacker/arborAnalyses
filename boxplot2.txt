@@ -1,0 +1,50 @@
+#Bob Thacker's modification of Steven Kembel's workflow
+#Citation: http://phylodiversity.net/skembel/r-workshop/biodivR/SK_Biodiversity_R.html
+
+library(picante)
+library(cardoonTools)
+
+#start with community data file and metadata file, then calculate inverse simpson index
+#load: grassland.community.csv as comm
+#load: grassland.plot.metadata.csv as metadata
+#pick: habitat as the column to group data
+#the input type needs to be table:r.dataframe for the rownames trick below to work
+
+#this next line is here just to get an output file to check the input
+#comm
+#header imports ok, but first column is row names
+
+#next two lines are needed to fix rownames
+row.names(comm)<-comm[,1]
+comm.fixed<-comm[,-1]
+
+#need to calculate as relative abundance
+comm.total<- decostand(comm.fixed, method="total")
+
+#calculate inverse Simpson's index of diversity; note this object already will have row.names
+invsimpson.comm <- diversity(comm.total, index = "invsimpson")
+
+#import the metadata also as table:r.dataframe and fix rownames 
+rownames(metadata)<-metadata[,1]
+metadata<-metadata[,-1]
+
+#need to add a matching function to make sure metadata and comm are sorted correctly
+
+ylab = "Inverse Simpson Index"
+
+#this representation of the boxplot command is the key for plotting inside arbor
+ff<-formula(paste("invsimpson.comm ~ metadata$", column_to_aggregate, sep=""))
+myPlot <- function(){
+ boxplot(ff, xlab = column_to_aggregate, ylab=ylab)
+}
+
+#larger
+diversityPlot <- cardoonPlot(expression(myPlot()), width=1000, height=1000, res=100)
+#smaller
+small.diversityPlot <- cardoonPlot(expression(myPlot()))
+
+#make image:png.base64
+diversityPlot = diversityPlot$png
+small.diversityPlot <- small.diversityPlot$png
+
+#end
