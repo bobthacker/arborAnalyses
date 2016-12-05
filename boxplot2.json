@@ -1,0 +1,65 @@
+{
+    "description": "",
+    "inputs": [
+        {
+            "description": "table:r.dataframe as csv for community data matrix",
+            "format": "r.dataframe",
+            "id": "comm",
+            "name": "comm",
+            "type": "table"
+        },
+        {
+            "description": "metadata as a csv file imported as table:r.dataframe",
+            "domain": {
+                "format": "column.names",
+                "input": "column_to_aggregate"
+            },
+            "format": "r.dataframe",
+            "id": "metadata",
+            "name": "metadata",
+            "type": "table"
+        },
+        {
+            "domain": {
+                "format": "column.names",
+                "input": "metadata"
+            },
+            "format": "text",
+            "name": "column_to_aggregate",
+            "type": "string"
+        }
+    ],
+    "mode": "r",
+    "name": "boxplot2",
+    "outputs": [
+        {
+            "description": "table:r.dataframe to check comm.total",
+            "format": "r.dataframe",
+            "id": "comm.total",
+            "name": "comm.total",
+            "type": "table"
+        },
+        {
+            "description": "inverse simpson index as an r.dataframe",
+            "format": "r.dataframe",
+            "id": "invsimpson.comm",
+            "name": "invsimpson.comm",
+            "type": "table"
+        },
+        {
+            "description": "diversityPlot as image:png.base64",
+            "format": "png.base64",
+            "id": "diversityPlot",
+            "name": "diversityPlot",
+            "type": "image"
+        },
+        {
+            "description": "a smaller version of the plot is the default",
+            "format": "png.base64",
+            "id": "small.diversityPlot",
+            "name": "small.diversityPlot",
+            "type": "image"
+        }
+    ],
+    "script": "#Bob Thacker's modification of Steven Kembel's workflow\n#Citation: http://phylodiversity.net/skembel/r-workshop/biodivR/SK_Biodiversity_R.html\n\nlibrary(picante)\nlibrary(cardoonTools)\n\n#start with community data file and metadata file, then calculate inverse simpson index\n#load: grassland.community.csv as comm\n#load: grassland.plot.metadata.csv as metadata\n#pick: habitat as the column to group data\n#the input type needs to be table:r.dataframe for the rownames trick below to work\n\n#this next line is here just to get an output file to check the input\n#comm\n#header imports ok, but first column is row names\n\n#next two lines are needed to fix rownames\nrow.names(comm)<-comm[,1]\ncomm.fixed<-comm[,-1]\n\n#need to calculate as relative abundance\ncomm.total<- decostand(comm.fixed, method=\"total\")\n\n#calculate inverse Simpson's index of diversity; note this object already will have row.names\ninvsimpson.comm <- diversity(comm.total, index = \"invsimpson\")\n\n#import the metadata also as table:r.dataframe and fix rownames \nrownames(metadata)<-metadata[,1]\nmetadata<-metadata[,-1]\n\n#need to add a matching function to make sure metadata and comm are sorted correctly\n\nylab = \"Inverse Simpson Index\"\n\n#this representation of the boxplot command is the key for plotting inside arbor\nff<-formula(paste(\"invsimpson.comm ~ metadata$\", column_to_aggregate, sep=\"\"))\nmyPlot <- function(){\n boxplot(ff, xlab = column_to_aggregate, ylab=ylab)\n}\n\n#larger\ndiversityPlot <- cardoonPlot(expression(myPlot()), width=1000, height=1000, res=100)\n#smaller\nsmall.diversityPlot <- cardoonPlot(expression(myPlot()))\n\n#make image:png.base64\ndiversityPlot = diversityPlot$png\nsmall.diversityPlot <- small.diversityPlot$png\n\n#end\n"
+}
