@@ -1,0 +1,22 @@
+{
+    "description": "",
+    "inputs": [
+        {
+            "format": "csv",
+            "id": "input",
+            "name": "input",
+            "type": "table"
+        }
+    ],
+    "mode": "r",
+    "name": "testNJv2",
+    "outputs": [
+        {
+            "format": "png.base64",
+            "id": "njPlot",
+            "name": "njPlot",
+            "type": "image"
+        }
+    ],
+    "script": "#test ability to read .fasta files and make NJ tree\nlibrary(ape)\nlibrary(cardoonTools)\n\ntemp<-\"/opt/girder/tempdata\"\n\nwrite.csv(input,file=paste(temp, \"/tempFile\", sep=\"\"))\n\nsequences<-read.dna(file=paste(temp, \"/tempFile\", sep=\"\"),skip=1,format=\"fasta\")\ndistances<-dist(sequences)\ntree<-nj(sequences)\n\nmyPlot <- function(myobject){\n  plot(myobject)\n}\n  \nnjPlot = cardoonPlot(expression(myPlot(tree)), width=1000, height=1000, res=100)\nnjPlot = njPlot$png\n"
+}

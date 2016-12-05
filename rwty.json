@@ -1,0 +1,64 @@
+{
+    "description": "Makes plots to check MCMC convergence using rwty. ",
+    "inputs": [
+        {
+            "format": "r.dataframe",
+            "id": "tree_data",
+            "name": "Tree data",
+            "type": "table"
+        },
+        {
+            "format": "r.dataframe",
+            "id": "log_data",
+            "name": "Log data",
+            "type": "table"
+        }
+    ],
+    "mode": "r",
+    "name": "rwty",
+    "outputs": [
+        {
+            "format": "png.base64",
+            "id": "likelihood_trace",
+            "name": "Likelihood Trace",
+            "type": "image"
+        },
+        {
+            "format": "png.base64",
+            "id": "tracePlots",
+            "name": "Trace Plots",
+            "type": "image"
+        },
+        {
+            "format": "png.base64",
+            "id": "densityPlots",
+            "name": "Density Plots",
+            "type": "image"
+        },
+        {
+            "format": "png.base64",
+            "id": "correlationPlots",
+            "name": "Correlation Plots",
+            "type": "image"
+        },
+        {
+            "format": "png.base64",
+            "id": "autocorrelationPlot",
+            "name": "Autocorrelation Plot",
+            "type": "image"
+        },
+        {
+            "format": "png.base64",
+            "id": "splitsfreqsPlot",
+            "name": "Split Frequencies Plots",
+            "type": "image"
+        },
+        {
+            "format": "png.base64",
+            "id": "treespacePlots",
+            "name": "Treespace plots",
+            "type": "image"
+        }
+    ],
+    "script": "library(\"rwty\")\nlibrary(\"cardoonTools\")\nlibrary(\"ggplot2\")\nlibrary(\"gridExtra\")\n\ntd<-\"/opt/girder/tempdata\"\n\nwrite.table(tree_data, file=paste(td, \"/temp.trees\", sep=\"\"), sep=\"\\t\", row.names=F, quote=F)\nwrite.table(log_data, file=paste(td, \"/temp.log\", sep=\"\"), sep=\"\\t\", row.names=F, quote=F)\nrwty_trees<-load.trees(paste(td, \"/temp.trees\", sep=\"\"), format=\"revbayes\")\n\n\nrwty_analysis<-analyze.rwty(rwty_trees)\nlikelihood_trace<-cardoonPlot(rwty_analysis$Likelihood.trace$trace.plot, width=1000, height=500, res=100)$png\nautocorrelationPlot<-cardoonPlot(rwty_analysis$autocorr.plot, width=1000, height=500, res=100)$png\n\n\nall_variables<-colnames(rwty_trees$ptable)[-(1:4)]\nnvar <- length(all_variables)\n#if(nvar>12) nvar=12\n\ntracePlotList<-list()\ndensityPlotList<-list()\nfor(i in 1:nvar) {\n  tracePlotList[[i]]<-rwty_analysis[[paste(all_variables[i], \".trace\", sep=\"\")]]$trace.plot\n  densityPlotList[[i]]<-rwty_analysis[[paste(all_variables[i], \".trace\", sep=\"\")]]$density.plot\n}\n\nnplotcol<-3\nnplotrow<-ceiling(nvar/nplotcol)\n\ntempplotfile=paste(td, \"/temp.png\", sep=\"\")\nggsave(tempplotfile, device=\"png\", width=10, height=15, dpi=150, marrangeGrob(tracePlotList, ncol=nplotcol, nrow=nplotrow))\n\nbytes <- file.info(tempplotfile)$size\ntracePlots <- base64enc:::base64encode(readBin(tempplotfile,\"raw\", n = bytes))\n\nggsave(tempplotfile, device=\"png\", width=10, height=20, dpi=150, marrangeGrob(densityPlotList, ncol=nplotcol, nrow=nplotrow))\n\nbytes <- file.info(tempplotfile)$size\ndensityPlots <- base64enc:::base64encode(readBin(tempplotfile,\"raw\", n = bytes))\n\n\ngrid.draw.gg <- function(x) {\n  print(x)\n}\n\nggsave(tempplotfile, device=\"png\", width=5, height=5, rwty_analysis$Chain.1.correlations)\nbytes <- file.info(tempplotfile)$size\ncorrelationPlots <- base64enc:::base64encode(readBin(tempplotfile,\"raw\", n = bytes))\n\nall_splitsfreq_plots<-list(\nrwty_analysis$splitfreqs.sliding.plot,\nrwty_analysis$acsf.sliding.plot,\nrwty_analysis$splitfreqs.cumulative.plot,\nrwty_analysis$acsf.cumulative.plot)\n\nggsave(tempplotfile, device=\"png\", width=10, height=10, dpi=150, marrangeGrob(all_splitsfreq_plots, ncol=2, nrow=2))\nbytes <- file.info(tempplotfile)$size\nsplitsfreqsPlot <- base64enc:::base64encode(readBin(tempplotfile,\"raw\", n = bytes))\n\nall_treespace_plots<-list(\n  rwty_analysis$treespace.heatmap,\n  rwty_analysis$treespace.points.plot\n)\nggsave(tempplotfile, device=\"png\", width=5, height=10, dpi=150, marrangeGrob(all_treespace_plots, ncol=1, nrow=2))\nbytes <- file.info(tempplotfile)$size\ntreespacePlots <- base64enc:::base64encode(readBin(tempplotfile,\"raw\", n = bytes))\n\nfile.remove(paste(td, \"/temp.trees\", sep=\"\"))\nfile.remove(file=paste(td, \"/temp.log\", sep=\"\"))\nfile.remove(tempplotfile)\n\n"
+}

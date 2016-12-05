@@ -1,0 +1,76 @@
+{
+    "description": "",
+    "inputs": [
+        {
+            "format": "r.dataframe",
+            "id": "tree_data_run1",
+            "name": "Tree Data - Run 1",
+            "type": "table"
+        },
+        {
+            "format": "r.dataframe",
+            "id": "tree_data_run2",
+            "name": "Tree Data - Run 2",
+            "type": "table"
+        },
+        {
+            "format": "r.dataframe",
+            "id": "log_data_run1",
+            "name": "Log Data - Run 1",
+            "type": "table"
+        },
+        {
+            "format": "r.dataframe",
+            "id": "log_data_run2",
+            "name": "Log Data - Run 2",
+            "type": "table"
+        }
+    ],
+    "mode": "r",
+    "name": "rwty_multi",
+    "outputs": [
+        {
+            "format": "png.base64",
+            "id": "autocorrelationPlot",
+            "name": "Autocorrelation plot",
+            "type": "image"
+        },
+        {
+            "format": "png.base64",
+            "id": "tracePlots",
+            "name": "Trace Plots",
+            "type": "image"
+        },
+        {
+            "format": "png.base64",
+            "id": "densityPlots",
+            "name": "Density Plots",
+            "type": "image"
+        },
+        {
+            "format": "png.base64",
+            "id": "correlationPlots_run1",
+            "name": "Correlation plots for run 1",
+            "type": "image"
+        },
+        {
+            "format": "png.base64",
+            "id": "correlationPlots_run2",
+            "name": "Correlation plots for run 2",
+            "type": "image"
+        },
+        {
+            "format": "png.base64",
+            "id": "splitsfreqsPlot",
+            "name": "Splits Frequencies Plots",
+            "type": "image"
+        },
+        {
+            "format": "png.base64",
+            "id": "treespacePlots",
+            "name": "Treespace Plots",
+            "type": "image"
+        }
+    ],
+    "script": "\n###\n\nlibrary(\"rwty\")\nlibrary(\"cardoonTools\")\nlibrary(\"ggplot2\")\nlibrary(\"gridExtra\")\nlibrary(\"parallel\")\ngetOption(\"mccoores\", 2L)\n\ntd<-\"/opt/girder/tempdata\"\n\nwrite.table(tree_data_run1, file=paste(td, \"/temp_run1.trees\", sep=\"\"), sep=\"\\t\", row.names=F, quote=F)\nwrite.table(tree_data_run2, file=paste(td, \"/temp_run2.trees\", sep=\"\"), sep=\"\\t\", row.names=F, quote=F)\n\nwrite.table(log_data_run1, file=paste(td, \"/temp_run1.log\", sep=\"\"), sep=\"\\t\", row.names=F, quote=F)\nwrite.table(log_data_run2, file=paste(td, \"/temp_run2.log\", sep=\"\"), sep=\"\\t\", row.names=F, quote=F)\n\nrwty_trees<-load.multi(td, format=\"revbayes\")\n\nrwty_analysis<-analyze.rwty(rwty_trees, max.sampling.interval=10)\nlikelihood_trace<-cardoonPlot(rwty_analysis$Likelihood.trace$trace.plot, width=1000, height=500, res=100)$png\nautocorrelationPlot<-cardoonPlot(rwty_analysis$autocorr.plot, width=1000, height=500, res=100)$png\n\n\nrun1_variables<-colnames(rwty_trees[[1]]$ptable)[-(1:4)]\nrun2_variables<-colnames(rwty_trees[[2]]$ptable)[-(1:4)]\nif(identical(run1_variables, run2_variables)) {\n  all_variables<-run1_variables\n} else {\n  error(\"Mismatch in log file column names\")\n}\n\nnvar <- length(all_variables)\n\ntracePlotList<-list()\ndensityPlotList<-list()\nfor(i in 1:nvar) {\n  tracePlotList[[i]]<-rwty_analysis[[paste(all_variables[i], \".trace\", sep=\"\")]]$trace.plot\n  densityPlotList[[i]]<-rwty_analysis[[paste(all_variables[i], \".trace\", sep=\"\")]]$density.plot\n}\n\nnplotcol<-3\nnplotrow<-ceiling(nvar/nplotcol)\n\ntempplotfile=paste(td, \"/temp.png\", sep=\"\")\nggsave(tempplotfile, device=\"png\", width=10, height=15, dpi=150, marrangeGrob(tracePlotList, ncol=nplotcol, nrow=nplotrow))\n\nbytes <- file.info(tempplotfile)$size\ntracePlots <- base64enc:::base64encode(readBin(tempplotfile,\"raw\", n = bytes))\n\nggsave(tempplotfile, device=\"png\", width=10, height=10, dpi=150, marrangeGrob(densityPlotList, ncol=nplotcol, nrow=nplotrow))\n\nbytes <- file.info(tempplotfile)$size\ndensityPlots <- base64enc:::base64encode(readBin(tempplotfile,\"raw\", n = bytes))\n\n\ngrid.draw.gg <- function(x) {\n  print(x)\n}\n\nggsave(tempplotfile, device=\"png\", width=5, height=5, rwty_analysis$temp_run1.trees.correlations)\nbytes <- file.info(tempplotfile)$size\ncorrelationPlots_run1 <- base64enc:::base64encode(readBin(tempplotfile,\"raw\", n = bytes))\n\nggsave(tempplotfile, device=\"png\", width=5, height=5, rwty_analysis$temp_run2.trees.correlations)\nbytes <- file.info(tempplotfile)$size\ncorrelationPlots_run2 <- base64enc:::base64encode(readBin(tempplotfile,\"raw\", n = bytes))\n\n\n\nall_splitsfreq_plots<-list(\n  rwty_analysis$splitfreqs.sliding.plot,\n  rwty_analysis$acsf.sliding.plot,\n  rwty_analysis$splitfreqs.cumulative.plot,\n  rwty_analysis$acsf.cumulative.plot)\n\nggsave(tempplotfile, device=\"png\", width=10, height=10, dpi=150, marrangeGrob(all_splitsfreq_plots, ncol=2, nrow=2))\nbytes <- file.info(tempplotfile)$size\nsplitsfreqsPlot <- base64enc:::base64encode(readBin(tempplotfile,\"raw\", n = bytes))\n\nall_treespace_plots<-list(\n  rwty_analysis$treespace.heatmap,\n  rwty_analysis$treespace.points.plot\n)\nggsave(tempplotfile, device=\"png\", width=5, height=10, dpi=150, marrangeGrob(all_treespace_plots, ncol=1, nrow=2))\nbytes <- file.info(tempplotfile)$size\ntreespacePlots <- base64enc:::base64encode(readBin(tempplotfile,\"raw\", n = bytes))\n\nfile.remove(paste(td, \"/temp_run1.trees\", sep=\"\"))\nfile.remove(paste(td, \"/temp_run2.trees\", sep=\"\"))\nfile.remove(paste(td, \"/temp_run1.log\", sep=\"\"))\nfile.remove(paste(td, \"/temp_run2.log\", sep=\"\"))\nfile.remove(tempplotfile)\n"
+}

@@ -1,0 +1,28 @@
+{
+    "description": "",
+    "inputs": [
+        {
+            "default": {
+                "data": "SynAligned2.csv",
+                "format": "text",
+                "type": "string"
+            },
+            "description": "FASTA file with fake header line and .csv extension",
+            "format": "csv",
+            "id": "input",
+            "name": "input",
+            "type": "table"
+        }
+    ],
+    "mode": "r",
+    "name": "testNJ",
+    "outputs": [
+        {
+            "format": "png.base64",
+            "id": "njPlot",
+            "name": "njPlot",
+            "type": "image"
+        }
+    ],
+    "script": "#test ability to read .fasta files and make NJ tree\nlibrary(ape)\nlibrary(cardoonTools)\n\ntemp<-\"/opt/girder/tempdata\"\n\nwrite.csv(input,file=paste(temp, \"/tempFile\", sep=\"\"))\n\nsequences<-read.dna(file=paste(temp, \"/tempFile\", sep=\"\"),skip=1,format=\"fasta\")\ndistances<-dist(sequences)\ntree<-nj(sequences)\n\nmyPlot <- function(myobject){\n  plot(myobject)\n}\n  \nnjPlot = cardoonPlot(expression(myPlot(tree)), width=1000, height=1000, res=100)\nnjPlot = njPlot$png\n\n\n#in vanilla R, this works:\n# sequences<-read.dna(\"SynAligned2.csv\",skip=1,format=\"fasta\")\n# distances<-dist(sequences)\n# tree<-nj(distances)\n# plot(tree)"
+}
