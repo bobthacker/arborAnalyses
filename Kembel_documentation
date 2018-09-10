@@ -1,20 +1,24 @@
-# Picante and the Kembel Biodiversity Worklfow
+# R package 'picante' and the Kembel Biodiversity Workflow
 
-## Use Picante to explore and analyze community data.
+## Use 'picante' to explore and analyze community data.
 
-This tutorial will guide the user through the picante-based biodiversity workflow of Steven Kembel.  Picante is an R package that allows for analysis of community data in a multivariate and phylogenetic context.  
+This tutorial will guide the user through Steven Kembel's biodiversity workflow developed for the R package 'picante'.  Picante allows users to analyze community ecology data sets in a multivariate and phylogenetic context.
 
-Documentation on Picante can be found at [https://cran.r-project.org/web/packages/picante/index.html](https://cran.r-project.org/web/packages/picante/index.html), and the original workflow can be found at [http://kembellab.ca/r-workshop/biodivR/SK_Biodiversity_R.html](http://kembellab.ca/r-workshop/biodivR/SK_Biodiversity_R.html). 
+Documentation for picante can be found at [https://cran.r-project.org/web/packages/picante/index.html](https://cran.r-project.org/web/packages/picante/index.html), and the original workflow can be found at [http://kembellab.ca/r-workshop/biodivR/SK_Biodiversity_R.html](http://kembellab.ca/r-workshop/biodivR/SK_Biodiversity_R.html).
 
 The Arbor instance we will be using for this tutorial can be located at [http://52.204.9.236/](http://52.204.9.236/#).  To prepare for the tutorial, sign in using your username and password and highlight the eyeball icon next to the KembelBiodiversityWorkshop directory.
-
 
 <img src="/Users/bob/Desktop/joeDocuments/KBWScreenshot1.png" width="1000px" />
 
 ## Loading example data
 
-This tutorial will use files containing data on species traits, species abundance, and community metadata.  A phylogeny of the species inhabiting the communities being analyzed will also be used.  These files are saved in the Arbor program, and are called 'species.traits.csv (KembelBiodiversityWorkshop)', 'grassland.community.csv (KembelBiodiversityWorkshop)', 'plot.metadata.csv (KembelBiodiversityWorkshop)', and 'grassland.phylogeny.newick (KembelBiodiversityWorkshop)'.  If you wish to download and view a file, select it from the dropdown list at the bottom of the Arbor homepage and click the download button.
+This tutorial will use files containing species traits, species abundances, a species phylogeny, and community metadata. These files are saved in the Arbor instance, and are called:
+* species.traits.csv (KembelBiodiversityWorkshop)
+* grassland.community.csv (KembelBiodiversityWorkshop)
+* plot.metadata.csv (KembelBiodiversityWorkshop)
+* grassland.phylogeny.newick (KembelBiodiversityWorkshop)
 
+If you wish to download and view a file, select it from the dropdown list at the bottom of the Arbor homepage and click the download button.
 
 <img src="/Users/bob/Desktop/joeDocuments/KBWScreenshot2.png" width="1000px" />
 
@@ -22,11 +26,15 @@ This tutorial will use files containing data on species traits, species abundanc
 
 Before we run any analysis on the data, we are first going to transform and standardize it.  To accomplish this, we will use the 'KBW.1.enter.visualize.and.transform.data.workflow (KembelBiodiversityWorkshop)' workflow.  Begin by clicking on the 'Analysis' tab, then select 'KBW.1.enter.visualize.and.transform.data.workflow (KembelBiodiversityWorkshop)' from the dropdown menu.
 
-
 <img src="/Users/bob/Desktop/joeDocuments/KBWScreenshot3.png" width="1000px" />
 
-Next, click on the blue 'Set up and run' button.  You will see a popup box listing the outputs of the modules in your workflow.  Note the gray text next to the output; it denotes the format of the output.  For example, __treePlot__'s output will be formatted as an image.  At the bottom of the box, select the input files 'species.traits.csv (KembelBiodiversityWorkshop)' for __traits__, 'grassland.phylogeny.newick (KembelBiodiversityWorkshop)' for __phylogeny__, 'grassland.community.csv (KembelBiodiversityWorkshop)' for __comm__, and 'plot.metadata.csv (KembelBiodiversityWorkshop)'  for __metadata__.  To start the analysis, click the blue 'Run' button.
+Next, click on the blue 'Set up and run' button.  You will see a popup box listing the outputs of the modules in your workflow.  Note the gray text next to the output; it denotes the format of the output.  For example, __treePlot__'s output will be formatted as an image.  At the bottom of the box, select the input files
+* 'species.traits.csv (KembelBiodiversityWorkshop)' for __traits__
+* 'grassland.phylogeny.newick (KembelBiodiversityWorkshop)' for __phylogeny__
+* 'grassland.community.csv (KembelBiodiversityWorkshop)' for __comm__
+* 'plot.metadata.csv (KembelBiodiversityWorkshop)'  for __metadata__
 
+To start the analysis, click the blue 'Run' button.
 
 <img src="/Users/bob/Desktop/joeDocuments/KBWScreenshot4.png" width="400px" height="400px"/>
 
@@ -71,9 +79,9 @@ Next, click the blue 'Set up and run' button and select the input files. As befo
 
 The outputs of this analysis can be visualized as before. Under the 'Visualization' tab select a class of output from the dropdown menu under __select visualization__, then select the desired output under __data__. Finally, click on the blue 'Update' button.
 
-##Look at the script for each module
+## Examine the R scripts for each module
 
-Arbor workflows are constructed using modules that can be assembled as needed to fit the specific needs of your analysis.   To view the script, click the 'Show script button' under the analysis tab.  You can also choose to download the module as a .json file by clicking on the blue 'Download' button.
+Arbor workflows are constructed using modules that can be assembled as needed to fit the specific needs of your analysis.   To view the script for a module, click the 'Show script' button under the analysis tab.  You can also choose to download the module as a .json file by clicking on the blue 'Download' button.
 
 
 <img src="/Users/bob/Desktop/joeDocuments/KBWScreenshot11.png" width="1000px" />
